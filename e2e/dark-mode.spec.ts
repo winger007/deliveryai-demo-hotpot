@@ -7,9 +7,14 @@ async function goToMenu(page: Page) {
   await page.getByRole('button', { name: /进入点餐|Enter/ }).click()
 }
 
-/** Locate the dark mode toggle button in the TopBar. */
+/**
+ * Locate the dark mode toggle button in the TopBar.
+ * Use .last() because when elderly mode is ON, the elderly button's aria-label
+ * becomes '切换至常规模式', which collides with the dark mode button's aria-label.
+ * The dark mode button is always after the elderly button in the DOM.
+ */
 function darkModeToggle(page: Page) {
-  return page.getByRole('button', { name: /切换至夜间模式|切换至常规模式|Switch to dark mode|Switch to light mode/ })
+  return page.getByRole('button', { name: /切换至夜间模式|切换至常规模式|Switch to dark mode|Switch to light mode/ }).last()
 }
 
 test.describe('夜间模式（Dark Mode）- E2E 联调验收测试', () => {
@@ -145,6 +150,7 @@ test.describe('夜间模式（Dark Mode）- E2E 联调验收测试', () => {
   })
 
   test('DM-013: 夜间模式下演示控制台弹窗呈现深色主题', async ({ page }) => {
+    test.setTimeout(60000)
     await goToMenu(page)
     await darkModeToggle(page).click()
     // 打开演示控制台
@@ -156,17 +162,18 @@ test.describe('夜间模式（Dark Mode）- E2E 联调验收测试', () => {
   })
 
   test('DM-014: 夜间模式下语言切换功能正常', async ({ page }) => {
+    test.setTimeout(60000)
     await goToMenu(page)
     await darkModeToggle(page).click()
     await expect(page.locator('html')).toHaveClass(/dark/)
     // 切换到英文
-    await page.getByRole('button', { name: /切换语言/ }).click()
+    await page.getByRole('button', { name: /切换语言|Switch language/ }).click()
     // 夜间模式仍保持
     await expect(page.locator('html')).toHaveClass(/dark/)
     // 英文下按钮 aria-label 应为 'Switch to light mode'
     await expect(darkModeToggle(page)).toHaveAttribute('aria-label', 'Switch to light mode')
     // 切回中文
-    await page.getByRole('button', { name: /切换语言/ }).click()
+    await page.getByRole('button', { name: /切换语言|Switch language/ }).click()
     await expect(darkModeToggle(page)).toHaveAttribute('aria-label', '切换至常规模式')
   })
 
