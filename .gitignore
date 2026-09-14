@@ -4,3 +4,8 @@ dist/
 *.log
 .vefaas/
 *.tsbuildinfo
+
+# Playwright
+playwright-report/
+test-results/
+screenshots/
